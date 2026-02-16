@@ -1,36 +1,45 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-md-8">
-        <h2 class="text-center mb-4">Gate: <span class="badge bg-primary">{{ gate_type }}</span></h2>
+<div class="row justify-content-center g-0 g-md-4">
+    <div class="col-12 col-md-8 px-2">
+        <div class="d-flex align-items-center justify-content-center mb-4 gap-2">
+            <h2 class="mb-0">Gate:</h2>
+            <span class="badge {{ 'bg-success' if gate_type == 'IN' else 'bg-danger' }} fs-5 px-3">{{ gate_type
+                }}</span>
+        </div>
 
-        <div class="scanner-container">
+        <div class="scanner-container shadow-sm p-1 p-md-3 bg-white rounded-4 border">
             <div id="reader"></div>
         </div>
 
-        <div id="result-box" class="result-box">
-            <h3 id="result-title"></h3>
-            <p id="result-message"></p>
-            <div id="student-details" style="display:none;">
-                <p><strong>Name:</strong> <span id="student-name"></span></p>
-                <p><strong>Reg No:</strong> <span id="student-reg"></span></p>
-                <p><strong>Dept:</strong> <span id="student-dept"></span></p>
+        <div id="result-box" class="result-box shadow-lg">
+            <h3 id="result-title" class="fw-bold"></h3>
+            <p id="result-message" class="mb-3"></p>
+            <div id="student-details" style="display:none;"
+                class="bg-white bg-opacity-50 p-3 rounded-3 mb-3 text-start">
+                <div class="d-flex justify-content-between mb-2 border-bottom pb-1">
+                    <strong>Name:</strong> <span id="student-name"></span>
+                </div>
+                <div class="d-flex justify-content-between mb-2 border-bottom pb-1">
+                    <strong>Reg No:</strong> <span id="student-reg"></span>
+                </div>
+                <div class="d-flex justify-content-between">
+                    <strong>Dept:</strong> <span id="student-dept"></span>
+                </div>
             </div>
+            <button id="resume-btn" class="btn btn-primary w-100 py-3 fw-bold rounded-pill" style="display:none;">Scan
+                Next</button>
         </div>
 
-        <div class="text-center mt-3">
-            <button id="resume-btn" class="btn btn-primary px-4 py-2 fw-bold" style="display:none;">Scan Next</button>
-        </div>
-
-        <div class="mt-5">
-            <h5 class="fw-bold mb-3 d-flex align-items-center">
-                <i class="bi bi-clock-history me-2"></i> Recent Scans
-            </h5>
-            <div id="recent-scans" class="list-group shadow-sm">
+        <div class="mt-4 px-1">
+            <h6 class="fw-bold mb-3 d-flex align-items-center text-muted text-uppercase">
+                <i class="bi bi-clock-history me-2"></i> Recent Activity
+            </h6>
+            <div id="recent-scans" class="list-group list-group-flush rounded-4 overflow-hidden border">
                 <!-- Recent scans will appear here -->
-                <div class="list-group-item text-center text-muted py-3 small" id="no-scans-msg">
-                    No scans in this session yet.
+                <div class="list-group-item text-center text-muted py-4 small" id="no-scans-msg">
+                    No activity in this session.
                 </div>
             </div>
         </div>

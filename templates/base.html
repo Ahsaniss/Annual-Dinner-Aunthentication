@@ -20,7 +20,33 @@
             background-color: #f8fafc;
             color: #1e293b;
             min-height: 100vh;
-            padding-top: 40px;
+            padding-top: 20px;
+        }
+
+        @media (min-width: 768px) {
+            body {
+                padding-top: 40px;
+            }
+        }
+
+        .container {
+            padding-left: 15px;
+            padding-right: 15px;
+        }
+
+        @media (max-width: 576px) {
+            h1 {
+                font-size: 1.75rem;
+            }
+
+            h2 {
+                font-size: 1.5rem;
+            }
+
+            .container {
+                padding-left: 10px;
+                padding-right: 10px;
+            }
         }
 
         .card {

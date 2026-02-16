@@ -1,47 +1,51 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h1>Dashboard</h1>
-    <div>
-        <a href="{{ url_for('scanner', gate_type='IN') }}" class="btn btn-success me-2" target="_blank">Open IN
-            Scanner</a>
-        <a href="{{ url_for('scanner', gate_type='OUT') }}" class="btn btn-danger me-2" target="_blank">Open OUT
-            Scanner</a>
-        <a href="{{ url_for('logout') }}" class="btn btn-outline-secondary">Logout</a>
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+    <h1 class="mb-0">Dashboard</h1>
+    <div class="d-flex flex-wrap gap-2">
+        <a href="{{ url_for('scanner', gate_type='IN') }}" class="btn btn-success flex-grow-1 flex-md-grow-0"
+            target="_blank">
+            <i class="bi bi-qr-code-scan me-1"></i> IN
+        </a>
+        <a href="{{ url_for('scanner', gate_type='OUT') }}" class="btn btn-danger flex-grow-1 flex-md-grow-0"
+            target="_blank">
+            <i class="bi bi-qr-code-scan me-1"></i> OUT
+        </a>
+        <a href="{{ url_for('logout') }}" class="btn btn-outline-secondary flex-grow-1 flex-md-grow-0">Logout</a>
     </div>
 </div>
 
-<div class="row mb-4">
-    <div class="col-md-3">
-        <div class="card stat-card bg-primary text-white shadow-sm border-0">
-            <div class="card-body">
-                <h6 class="text-uppercase mb-2 opacity-75">Total Registered</h6>
-                <h2 class="display-6 fw-bold mb-0">{{ stats.total }}</h2>
+<div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+        <div class="card stat-card bg-primary text-white shadow-sm border-0 h-100">
+            <div class="card-body p-3">
+                <h6 class="text-uppercase mb-1 small opacity-75">Total</h6>
+                <h2 class="fw-bold mb-0 h3">{{ stats.total }}</h2>
             </div>
         </div>
     </div>
-    <div class="col-md-3">
-        <div class="card stat-card bg-success text-white shadow-sm border-0">
-            <div class="card-body">
-                <h6 class="text-uppercase mb-2 opacity-75">Total Entered</h6>
-                <h2 class="display-6 fw-bold mb-0">{{ stats.entered }}</h2>
+    <div class="col-6 col-md-3">
+        <div class="card stat-card bg-success text-white shadow-sm border-0 h-100">
+            <div class="card-body p-3">
+                <h6 class="text-uppercase mb-1 small opacity-75">Entered</h6>
+                <h2 class="fw-bold mb-0 h3">{{ stats.entered }}</h2>
             </div>
         </div>
     </div>
-    <div class="col-md-3">
-        <div class="card stat-card bg-info text-white shadow-sm border-0">
-            <div class="card-body">
-                <h6 class="text-uppercase mb-2 opacity-75">Currently Inside</h6>
-                <h2 class="display-6 fw-bold mb-0">{{ stats.current_inside }}</h2>
+    <div class="col-6 col-md-3">
+        <div class="card stat-card bg-info text-white shadow-sm border-0 h-100">
+            <div class="card-body p-3">
+                <h6 class="text-uppercase mb-1 small opacity-75">Inside</h6>
+                <h2 class="fw-bold mb-0 h3">{{ stats.current_inside }}</h2>
             </div>
         </div>
     </div>
-    <div class="col-md-3">
-        <div class="card stat-card bg-secondary text-white shadow-sm border-0">
-            <div class="card-body">
-                <h6 class="text-uppercase mb-2 opacity-75">Exited</h6>
-                <h2 class="display-6 fw-bold mb-0">{{ stats.exited }}</h2>
+    <div class="col-6 col-md-3">
+        <div class="card stat-card bg-secondary text-white shadow-sm border-0 h-100">
+            <div class="card-body p-3">
+                <h6 class="text-uppercase mb-1 small opacity-75">Exited</h6>
+                <h2 class="fw-bold mb-0 h3">{{ stats.exited }}</h2>
             </div>
         </div>
     </div>
@@ -67,20 +71,24 @@
     </div>
     <div class="col-md-8 mb-4">
         <div class="card shadow-sm border-0 h-100">
-            <div class="card-header bg-white border-bottom-0 pt-4 d-flex justify-content-between align-items-center">
-                <h5 class="fw-bold mb-0">Student Registry</h5>
-                <div class="d-flex align-items-center gap-2">
-                    <a href="{{ url_for('export_logs') }}" class="btn btn-sm btn-outline-success">
-                        <i class="bi bi-file-earmark-spreadsheet me-1"></i> Export Logs
-                    </a>
-                    <div class="input-group input-group-sm">
-                        <span class="input-group-text bg-light border-end-0"><i class="bi bi-search"></i></span>
-                        <input type="text" id="studentSearch" class="form-control bg-light border-start-0"
-                            placeholder="Search students...">
+            <div class="card-header bg-white border-bottom-0 pt-4 pb-0">
+                <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3">
+                    <h5 class="fw-bold mb-0">Student Registry</h5>
+                    <div class="d-flex align-items-center gap-2">
+                        <a href="{{ url_for('export_logs') }}"
+                            class="btn btn-sm btn-outline-success white-space-nowrap">
+                            <i class="bi bi-file-earmark-spreadsheet"></i> <span class="d-none d-md-inline">Export
+                                Logs</span>
+                        </a>
+                        <div class="input-group input-group-sm">
+                            <span class="input-group-text bg-light border-end-0"><i class="bi bi-search"></i></span>
+                            <input type="text" id="studentSearch" class="form-control bg-light border-start-0"
+                                placeholder="Search...">
+                        </div>
                     </div>
                 </div>
             </div>
-            <div class="card-body p-0">
+            <div class="card-body p-0 mt-3">
                 <div class="table-responsive" style="max-height: 400px;">
                     <table class="table table-hover align-middle mb-0" id="studentTable">
                         <thead class="bg-light sticky-top">
