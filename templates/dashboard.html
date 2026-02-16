@@ -1,0 +1,166 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Dashboard</h1>
+    <div>
+        <a href="{{ url_for('scanner', gate_type='IN') }}" class="btn btn-success me-2" target="_blank">Open IN
+            Scanner</a>
+        <a href="{{ url_for('scanner', gate_type='OUT') }}" class="btn btn-danger me-2" target="_blank">Open OUT
+            Scanner</a>
+        <a href="{{ url_for('logout') }}" class="btn btn-outline-secondary">Logout</a>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card stat-card bg-primary text-white shadow-sm border-0">
+            <div class="card-body">
+                <h6 class="text-uppercase mb-2 opacity-75">Total Registered</h6>
+                <h2 class="display-6 fw-bold mb-0">{{ stats.total }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stat-card bg-success text-white shadow-sm border-0">
+            <div class="card-body">
+                <h6 class="text-uppercase mb-2 opacity-75">Total Entered</h6>
+                <h2 class="display-6 fw-bold mb-0">{{ stats.entered }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stat-card bg-info text-white shadow-sm border-0">
+            <div class="card-body">
+                <h6 class="text-uppercase mb-2 opacity-75">Currently Inside</h6>
+                <h2 class="display-6 fw-bold mb-0">{{ stats.current_inside }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stat-card bg-secondary text-white shadow-sm border-0">
+            <div class="card-body">
+                <h6 class="text-uppercase mb-2 opacity-75">Exited</h6>
+                <h2 class="display-6 fw-bold mb-0">{{ stats.exited }}</h2>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-4 mb-4">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-header bg-white border-bottom-0 pt-4">
+                <h5 class="fw-bold">Upload Student List</h5>
+            </div>
+            <div class="card-body">
+                <form action="{{ url_for('upload_csv') }}" method="POST" enctype="multipart/form-data">
+                    <div class="mb-3">
+                        <label for="file" class="form-label text-muted">Select CSV File</label>
+                        <input class="form-control" type="file" id="file" name="file" accept=".csv" required>
+                        <div class="form-text">Required: Student_ID, Name, Reg_No, Department</div>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100 py-2 fw-bold">Upload & Generate QRs</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-8 mb-4">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-header bg-white border-bottom-0 pt-4 d-flex justify-content-between align-items-center">
+                <h5 class="fw-bold mb-0">Student Registry</h5>
+                <div class="d-flex align-items-center gap-2">
+                    <a href="{{ url_for('export_logs') }}" class="btn btn-sm btn-outline-success">
+                        <i class="bi bi-file-earmark-spreadsheet me-1"></i> Export Logs
+                    </a>
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text bg-light border-end-0"><i class="bi bi-search"></i></span>
+                        <input type="text" id="studentSearch" class="form-control bg-light border-start-0"
+                            placeholder="Search students...">
+                    </div>
+                </div>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive" style="max-height: 400px;">
+                    <table class="table table-hover align-middle mb-0" id="studentTable">
+                        <thead class="bg-light sticky-top">
+                            <tr>
+                                <th class="ps-4">Name</th>
+                                <th>Reg No</th>
+                                <th>Status</th>
+                                <th>Last Scan</th>
+                                <th class="pe-4 text-end">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for student in students %}
+                            <tr>
+                                <td class="ps-4">
+                                    <div class="fw-semibold">{{ student.Name }}</div>
+                                    <small class="text-muted">{{ student.Department }}</small>
+                                </td>
+                                <td>{{ student.Reg_No }}</td>
+                                <td>
+                                    {% if student.Status == 'IN' %}
+                                    <span class="badge bg-success-api rounded-pill px-3">INSIDE</span>
+                                    {% elif student.Status == 'OUT' %}
+                                    <span class="badge bg-secondary rounded-pill px-3">OUT</span>
+                                    {% else %}
+                                    <span class="badge bg-light text-dark rounded-pill px-3 border">NOT ARRIVED</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-muted small">
+                                    {% if student.Status == 'IN' %}
+                                    {{ student.Entry_Time }}
+                                    {% elif student.Status == 'OUT' %}
+                                    {{ student.Exit_Time }}
+                                    {% else %}
+                                    -
+                                    {% endif %}
+                                </td>
+                                <td class="pe-4 text-end">
+                                    <a href="{{ url_for('download_single_qr', ticket_id=student.Ticket_ID) }}"
+                                        class="btn btn-sm btn-light border" title="Download QR">
+                                        <i class="bi bi-qr-code"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="card-footer bg-white border-top-0 py-3 text-center">
+                <a href="{{ url_for('download_qrs') }}" class="btn btn-sm btn-outline-primary">Download All QR Codes
+                    (ZIP)</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .bg-success-api {
+        background-color: #28a745 !important;
+    }
+
+    .stat-card {
+        transition: transform 0.2s;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-5px);
+    }
+</style>
+
+<script>
+    document.getElementById('studentSearch').addEventListener('keyup', function () {
+        let filter = this.value.toLowerCase();
+        let rows = document.querySelectorAll('#studentTable tbody tr');
+
+        rows.forEach(row => {
+            let text = row.innerText.toLowerCase();
+            row.style.display = text.includes(filter) ? '' : 'none';
+        });
+    });
+</script>
+{% endblock %}
