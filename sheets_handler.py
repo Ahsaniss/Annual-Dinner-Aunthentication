@@ -37,8 +37,8 @@ class SheetsHandler:
         try:
             self.students_worksheet = self.sheet.worksheet("Students")
         except gspread.exceptions.WorksheetNotFound:
-            self.students_worksheet = self.sheet.add_worksheet(title="Students", rows="1000", cols="8")
-            self.students_worksheet.append_row(["Student_ID", "Name", "Reg_No", "Department", "Ticket_ID", "Status", "Entry_Time", "Exit_Time"])
+            self.students_worksheet = self.sheet.add_worksheet(title="Students", rows="1000", cols="7")
+            self.students_worksheet.append_row(["Student_ID", "Name", "Reg_No", "Section", "Ticket_ID", "Status", "Entry_Time"])
 
         try:
             self.logs_worksheet = self.sheet.worksheet("Scan Logs")
@@ -103,11 +103,9 @@ class SheetsHandler:
             # Update Status column (F)
             self.students_worksheet.update_cell(row_index, 6, status)
 
-            # Update Entry_Time (G) or Exit_Time (H)
+            # Update Entry_Time (G)
             if gate_type == "IN":
                  self.students_worksheet.update_cell(row_index, 7, timestamp)
-            elif gate_type == "OUT":
-                 self.students_worksheet.update_cell(row_index, 8, timestamp)
 
     def log_scan(self, ticket_id, gate_type, result):
         """Logs a scan event."""
@@ -174,13 +172,10 @@ class SheetsHandler:
             all_records = self.students_worksheet.get_all_records()
             total = len(all_records)
             entered = sum(1 for r in all_records if r.get("Status") == "IN")
-            exited = sum(1 for r in all_records if r.get("Status") == "OUT") 
             
             return {
                 "total": total,
-                "entered": entered,
-                "current_inside": entered, 
-                "exited": exited
+                "entered": entered
             }
         except Exception as e:
             print(f"Error fetching stats: {e}")

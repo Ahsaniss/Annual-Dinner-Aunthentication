@@ -7,6 +7,7 @@ import io
 import zipfile
 from functools import wraps
 import datetime
+import traceback
 
 app = Flask(__name__)
 app.secret_key = 'super_secret_key' # Change this in production
@@ -83,11 +84,23 @@ def upload_csv():
     
     if file:
         try:
-            # Read CSV
-            df = pd.read_csv(file)
+            # Read CSV with fallback for different encodings and automatic separator detection
+            try:
+                # First attempt with default settings
+                df = pd.read_csv(file)
+            except (UnicodeDecodeError, pd.errors.ParserError):
+                try:
+                    # Second attempt with latin-1 and auto-separator detection
+                    file.seek(0)
+                    df = pd.read_csv(file, encoding='latin-1', sep=None, engine='python')
+                except Exception as e:
+                    # Final attempt if still failing, try skipping bad lines
+                    file.seek(0)
+                    df = pd.read_csv(file, encoding='latin-1', sep=None, engine='python', on_bad_lines='skip')
+                    flash('Some lines were skipped due to formatting issues.')
             
             # Check required columns
-            required_cols = ['Student_ID', 'Name', 'Reg_No', 'Department']
+            required_cols = ['Student_ID', 'Name', 'Reg_No', 'Section']
             if not all(col in df.columns for col in required_cols):
                 flash(f'CSV must contain columns: {", ".join(required_cols)}')
                 return redirect(url_for('dashboard'))
@@ -96,7 +109,6 @@ def upload_csv():
             df['Ticket_ID'] = [generate_uuid() for _ in range(len(df))]
             df['Status'] = 'NOT_ENTERED'
             df['Entry_Time'] = ''
-            df['Exit_Time'] = ''
 
             # Generate QR Codes
             base_dir = os.path.dirname(os.path.abspath(__file__))
@@ -111,11 +123,12 @@ def upload_csv():
                     output_path=qr_path, 
                     name=row['Name'], 
                     reg_no=row['Reg_No'], 
-                    student_id=row['Student_ID']
+                    student_id=row['Student_ID'],
+                    section=row['Section']
                 )
             
             # Convert to list of lists for Sheets
-            students_data = df[['Student_ID', 'Name', 'Reg_No', 'Department', 'Ticket_ID', 'Status', 'Entry_Time', 'Exit_Time']].values.tolist()
+            students_data = df[['Student_ID', 'Name', 'Reg_No', 'Section', 'Ticket_ID', 'Status', 'Entry_Time']].values.tolist()
             
             # Upload to Sheets
             sheets_handler.add_students(students_data)
@@ -156,7 +169,8 @@ def download_qrs():
                     ticket_id, 
                     name=name, 
                     reg_no=reg_no, 
-                    student_id=student_id
+                    student_id=student_id,
+                    section=student.get('Section')
                 )
                 
                 # Save image to buffer to add to zip
@@ -183,7 +197,8 @@ def download_single_qr(ticket_id):
             ticket_id, 
             name=student.get('Name'), 
             reg_no=student.get('Reg_No'), 
-            student_id=student.get('Student_ID')
+            student_id=student.get('Student_ID'),
+            section=student.get('Section')
         )
         
         # Save to buffer
@@ -225,11 +240,9 @@ def export_logs():
         download_name=f'scan_logs_{timestamp}.csv'
     )
 
-@app.route('/scanner/<gate_type>')
-def scanner(gate_type):
-    if gate_type not in ['IN', 'OUT']:
-        return "Invalid Gate Type", 400
-    return render_template('scanner.html', gate_type=gate_type)
+@app.route('/scanner')
+def scanner():
+    return render_template('scanner.html')
 
 @app.route('/api/verify', methods=['POST'])
 def verify_ticket():
@@ -250,15 +263,16 @@ def verify_ticket():
     
     # Logic
     if gate_type == 'IN':
-        if current_status == 'NOT_ENTERED' or current_status == 'OUT': # Re-entry allowed if they went out
+        if current_status == 'NOT_ENTERED':
             sheets_handler.update_status(row_index, 'IN', 'IN')
             sheets_handler.log_scan(ticket_id, gate_type, 'SUCCESS')
             return jsonify({
                 'status': 'valid',
                 'student': {
+                    'student_id': student.get('Student_ID'),
                     'name': student.get('Name'),
                     'reg_no': student.get('Reg_No'),
-                    'dept': student.get('Department')
+                    'section': student.get('Section')
                 }
             })
         elif current_status == 'IN':
@@ -269,20 +283,6 @@ def verify_ticket():
                 'entry_time': student.get('Entry_Time')
             })
             
-    elif gate_type == 'OUT':
-        if current_status == 'IN':
-            sheets_handler.update_status(row_index, 'OUT', 'OUT')
-            sheets_handler.log_scan(ticket_id, gate_type, 'SUCCESS')
-            return jsonify({
-                'status': 'valid',
-                'message': 'Exit Recorded'
-            })
-        elif current_status == 'OUT' or current_status == 'NOT_ENTERED':
-            sheets_handler.log_scan(ticket_id, gate_type, 'INVALID_EXIT')
-            return jsonify({
-                 'status': 'error',
-                 'message': 'Student not checked in or already out'
-            })
 
     return jsonify({'status': 'error', 'message': 'Unknown error'}), 500
 

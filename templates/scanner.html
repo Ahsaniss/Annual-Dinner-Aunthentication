@@ -13,33 +13,50 @@
             <div id="reader"></div>
         </div>
 
-        <div id="result-box" class="result-box shadow-lg">
-            <h3 id="result-title" class="fw-bold"></h3>
-            <p id="result-message" class="mb-3"></p>
+        <div id="result-box" class="result-box shadow-lg" style="display: none;">
+            <div id="status-icon" class="mb-3">
+                <i class="bi bi-check-circle-fill display-1 text-success" id="allow-icon" style="display:none;"></i>
+                <i class="bi bi-x-circle-fill display-1 text-danger" id="decline-icon" style="display:none;"></i>
+            </div>
+            <h1 id="result-title" class="fw-bold mb-0"></h1>
+            <h4 id="result-subtitle" class="text-muted mb-4"></h4>
+
             <div id="student-details" style="display:none;"
-                class="bg-white bg-opacity-50 p-3 rounded-3 mb-3 text-start">
-                <div class="d-flex justify-content-between mb-2 border-bottom pb-1">
-                    <strong>Name:</strong> <span id="student-name"></span>
-                </div>
-                <div class="d-flex justify-content-between mb-2 border-bottom pb-1">
-                    <strong>Reg No:</strong> <span id="student-reg"></span>
-                </div>
-                <div class="d-flex justify-content-between">
-                    <strong>Dept:</strong> <span id="student-dept"></span>
+                class="bg-white p-3 rounded-4 mb-4 text-start border shadow-sm">
+                <div class="row g-2">
+                    <div class="col-12 border-bottom pb-2">
+                        <small class="text-muted d-block">NAME</small>
+                        <span id="student-name" class="fw-bold fs-5"></span>
+                    </div>
+                    <div class="col-6 border-bottom pb-2">
+                        <small class="text-muted d-block">STUDENT ID</small>
+                        <span id="student-id" class="fw-bold"></span>
+                    </div>
+                    <div class="col-6 border-bottom pb-2">
+                        <small class="text-muted d-block">REG NO</small>
+                        <span id="student-reg" class="fw-bold"></span>
+                    </div>
+                    <div class="col-12">
+                        <small class="text-muted d-block">SECTION</small>
+                        <span id="student-section" class="fw-bold"></span>
+                    </div>
                 </div>
             </div>
-            <button id="resume-btn" class="btn btn-primary w-100 py-3 fw-bold rounded-pill" style="display:none;">Scan
-                Next</button>
+
+            <button id="resume-btn" class="btn btn-primary w-100 py-3 fw-bold rounded-pill shadow-sm"
+                style="display:none;">
+                <i class="bi bi-camera me-2"></i> SCAN NEXT
+            </button>
         </div>
 
         <div class="mt-4 px-1">
             <h6 class="fw-bold mb-3 d-flex align-items-center text-muted text-uppercase">
-                <i class="bi bi-clock-history me-2"></i> Recent Activity
+                <i class="bi bi-clock-history me-2"></i> Recent Entries
             </h6>
             <div id="recent-scans" class="list-group list-group-flush rounded-4 overflow-hidden border">
                 <!-- Recent scans will appear here -->
                 <div class="list-group-item text-center text-muted py-4 small" id="no-scans-msg">
-                    No activity in this session.
+                    No entries in this session.
                 </div>
             </div>
         </div>
@@ -49,12 +66,13 @@
 
 {% block scripts %}
 <script>
-    const gateType = "{{ gate_type }}";
     const resultBox = document.getElementById('result-box');
     const resultTitle = document.getElementById('result-title');
-    const resultMessage = document.getElementById('result-message');
+    const resultSubtitle = document.getElementById('result-subtitle');
     const studentDetails = document.getElementById('student-details');
     const resumeBtn = document.getElementById('resume-btn');
+    const allowIcon = document.getElementById('allow-icon');
+    const declineIcon = document.getElementById('decline-icon');
 
     let isScanning = true;
     let html5QrcodeScanner = new Html5QrcodeScanner(
@@ -75,7 +93,7 @@
             },
             body: JSON.stringify({
                 ticket_id: decodedText,
-                gate_type: gateType
+                gate_type: 'IN' // Always IN now
             }),
         })
             .then(response => response.json())
@@ -92,36 +110,50 @@
         resultBox.style.display = 'block';
         studentDetails.style.display = 'none';
         resumeBtn.style.display = 'inline-block';
+        allowIcon.style.display = 'none';
+        declineIcon.style.display = 'none';
 
-        resultBox.className = 'result-box'; // Reset classes
+        resultBox.className = 'result-box p-4 rounded-4 text-center'; // Reset classes
 
         if (data.status === 'valid') {
-            resultBox.classList.add('result-success');
-            resultTitle.innerText = 'ACCESS GRANTED';
-            resultMessage.innerText = data.message || 'Verified Successfully';
+            resultBox.classList.add('bg-success', 'bg-opacity-10', 'border-success');
+            allowIcon.style.display = 'inline-block';
+            resultTitle.innerText = 'ALLOW';
+            resultTitle.className = 'fw-bold mb-0 text-success display-4';
+            resultSubtitle.innerText = 'Access Granted';
+
             if (data.student) {
                 studentDetails.style.display = 'block';
                 document.getElementById('student-name').innerText = data.student.name;
+                document.getElementById('student-id').innerText = data.student.student_id;
                 document.getElementById('student-reg').innerText = data.student.reg_no;
-                document.getElementById('student-dept').innerText = data.student.dept;
+                document.getElementById('student-section').innerText = data.student.section;
 
                 // Add to recent scans
-                addToRecentScans(data.student.name, data.student.reg_no, 'success');
+                addToRecentScans(data.student.name, data.student.reg_no, 'ALLOW');
             }
-        } else if (data.status === 'already_used') {
-            resultBox.classList.add('result-warning');
-            resultTitle.innerText = 'ALREADY ENTERED';
-            resultMessage.innerText = `Checked in at: ${data.entry_time}`;
-            addToRecentScans('Unknown', 'Duplicate', 'warning');
-        } else if (data.status === 'invalid') {
-            resultBox.classList.add('result-error');
-            resultTitle.innerText = 'INVALID TICKET';
-            resultMessage.innerText = 'Ticket ID not found in system.';
-            addToRecentScans('Unknown', 'Invalid', 'error');
         } else {
-            resultBox.classList.add('result-error');
-            resultTitle.innerText = 'ERROR';
-            resultMessage.innerText = data.message;
+            resultBox.classList.add('bg-danger', 'bg-opacity-10', 'border-danger');
+            declineIcon.style.display = 'inline-block';
+            resultTitle.innerText = 'DECLINE';
+            resultTitle.className = 'fw-bold mb-0 text-danger display-4';
+
+            if (data.status === 'already_used') {
+                resultSubtitle.innerText = 'ALREADY ENTERED';
+                if (data.student) {
+                    studentDetails.style.display = 'block';
+                    document.getElementById('student-name').innerText = data.student.name;
+                    document.getElementById('student-id').innerText = data.student.student_id;
+                    document.getElementById('student-reg').innerText = data.student.reg_no;
+                    document.getElementById('student-section').innerText = data.student.section;
+                }
+            } else if (data.status === 'invalid') {
+                resultSubtitle.innerText = 'Invalid Ticket';
+            } else {
+                resultSubtitle.innerText = data.message || 'Error occurred';
+            }
+
+            addToRecentScans(data.student ? data.student.name : 'Unknown', 'DECLINED', 'DECLINE');
         }
     }
 

@@ -9,10 +9,10 @@ def generate_uuid():
 
 from PIL import Image, ImageDraw, ImageFont
 
-def generate_qr_code(data, output_path=None, name=None, reg_no=None, student_id=None):
+def generate_qr_code(data, output_path=None, name=None, reg_no=None, student_id=None, section=None):
     """
     Generates a QR code for the given data.
-    If name, reg_no, or student_id are provided, adds them as text below the QR code.
+    If name, reg_no, student_id, or section are provided, adds them as text below the QR code.
     If output_path is provided, saves to file.
     Returns the image object.
     """
@@ -27,13 +27,13 @@ def generate_qr_code(data, output_path=None, name=None, reg_no=None, student_id=
 
     qr_img = qr.make_image(fill_color="black", back_color="white").convert('RGB')
     
-    if name or reg_no or student_id:
+    if name or reg_no or student_id or section:
         # Create a new image with space for text
         qr_width, qr_height = qr_img.size
-        # Add extra height for 3 lines of text
+        # Add extra height for 4 lines of text
         padding = 10
         line_height = 25
-        extra_height = (3 * line_height) + (2 * padding)
+        extra_height = (4 * line_height) + (2 * padding)
         
         combined_img = Image.new('RGB', (qr_width, qr_height + extra_height), color='white')
         combined_img.paste(qr_img, (0, 0))
@@ -43,8 +43,8 @@ def generate_qr_code(data, output_path=None, name=None, reg_no=None, student_id=
         # Try to load a font, fall back to default
         try:
             # Use a common font available on Windows
-            font = ImageFont.truetype("arial.ttf", 18)
-            font_bold = ImageFont.truetype("arialbd.ttf", 20)
+            font = ImageFont.truetype("arial.ttf", 16)
+            font_bold = ImageFont.truetype("arialbd.ttf", 18)
         except Exception:
             font = ImageFont.load_default()
             font_bold = font
@@ -61,6 +61,10 @@ def generate_qr_code(data, output_path=None, name=None, reg_no=None, student_id=
             
         if student_id:
             draw.text((qr_width // 2, y_offset), f"ID: {student_id}", fill="black", font=font, anchor="mt")
+            y_offset += line_height
+
+        if section:
+            draw.text((qr_width // 2, y_offset), f"Section: {section}", fill="black", font=font, anchor="mt")
         
         img = combined_img
     else:
