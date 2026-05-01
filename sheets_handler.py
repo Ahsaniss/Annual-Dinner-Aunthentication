@@ -3,6 +3,7 @@ from oauth2client.service_account import ServiceAccountCredentials
 import datetime
 import os
 import json
+import base64
 import tempfile
 
 class SheetsHandler:
@@ -27,6 +28,31 @@ class SheetsHandler:
 
         return self.credentials_file
 
+    def _load_credentials_from_env(self):
+        """Load service account credentials from environment variables."""
+        creds_json_env = os.environ.get('GOOGLE_SHEETS_CREDENTIALS_JSON')
+        creds_b64_env = os.environ.get('GOOGLE_SHEETS_CREDENTIALS_B64')
+
+        if creds_json_env:
+            try:
+                creds_dict = json.loads(creds_json_env)
+            except json.JSONDecodeError as exc:
+                raise ValueError("Invalid JSON in GOOGLE_SHEETS_CREDENTIALS_JSON environment variable") from exc
+        elif creds_b64_env:
+            try:
+                decoded = base64.b64decode(creds_b64_env).decode('utf-8')
+                creds_dict = json.loads(decoded)
+            except Exception as exc:
+                raise ValueError("Invalid base64 JSON in GOOGLE_SHEETS_CREDENTIALS_B64 environment variable") from exc
+        else:
+            return None
+
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
+            json.dump(creds_dict, f)
+            self.temp_creds_file = f.name
+            print(f"Using credentials from environment variable (temp file: {self.temp_creds_file})")
+            return self.temp_creds_file
+
     def connect(self):
         """Connects to Google Sheets using service account credentials."""
         try:
@@ -35,22 +61,13 @@ class SheetsHandler:
             
             # Check if credentials file exists
             if not os.path.exists(creds_file_to_use):
-                # Try loading from environment variable (for Vercel deployment)
-                creds_json_env = os.environ.get('GOOGLE_SHEETS_CREDENTIALS_JSON')
-                if creds_json_env:
-                    # Parse the JSON string and create a temporary file
-                    try:
-                        creds_dict = json.loads(creds_json_env)
-                        # Create a temporary file to store credentials
-                        with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
-                            json.dump(creds_dict, f)
-                            self.temp_creds_file = f.name
-                            creds_file_to_use = self.temp_creds_file
-                            print(f"Using credentials from environment variable (temp file: {self.temp_creds_file})")
-                    except json.JSONDecodeError:
-                        raise ValueError("Invalid JSON in GOOGLE_SHEETS_CREDENTIALS_JSON environment variable")
+                env_creds_file = self._load_credentials_from_env()
+                if env_creds_file:
+                    creds_file_to_use = env_creds_file
                 else:
-                            raise FileNotFoundError(f"Credentials file not found: {creds_file_to_use} and GOOGLE_SHEETS_CREDENTIALS_JSON env var not set")
+                    raise FileNotFoundError(
+                        f"Credentials file not found: {creds_file_to_use} and neither GOOGLE_SHEETS_CREDENTIALS_JSON nor GOOGLE_SHEETS_CREDENTIALS_B64 env vars are set"
+                    )
                 
             creds = ServiceAccountCredentials.from_json_keyfile_name(creds_file_to_use, scope)
             self.client = gspread.authorize(creds)
