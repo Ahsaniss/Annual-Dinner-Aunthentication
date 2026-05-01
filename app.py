@@ -17,6 +17,7 @@ from dotenv import load_dotenv
 env_path = os.path.join(os.path.dirname(__file__), '.env')
 load_dotenv(dotenv_path=env_path)
 
+# Handle credentials - can come from file (local) or environment variable (Vercel)
 CREDENTIALS_FILE = os.environ.get('GOOGLE_SHEETS_CREDENTIALS_FILE', 'credentials.json')
 SHEET_ID = os.environ.get('SHEET_ID', 'your_sheet_id')
 ADMIN_USERNAME = os.environ.get('ADMIN_USERNAME', 'admin')
@@ -26,7 +27,8 @@ print(f"\n--- ENV DEBUG ---")
 print(f"Working Dir: {os.getcwd()}")
 print(f"Env Path: {env_path} (Exists: {os.path.exists(env_path)})")
 print(f"Sheet ID: {'...' + SHEET_ID[-5:] if SHEET_ID else 'None'}")
-print(f"Credentials File: {CREDENTIALS_FILE}")
+print(f"Credentials File: {CREDENTIALS_FILE} (Exists: {os.path.exists(CREDENTIALS_FILE)})")
+print(f"Using Env Creds: {'GOOGLE_SHEETS_CREDENTIALS_JSON' in os.environ}")
 print(f"------------------\n")
 
 # Initialize Sheets Handler
