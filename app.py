@@ -110,22 +110,8 @@ def upload_csv():
             df['Status'] = 'NOT_ENTERED'
             df['Entry_Time'] = ''
 
-            # Generate QR Codes
-            base_dir = os.path.dirname(os.path.abspath(__file__))
-            qr_folder = os.path.join(base_dir, 'static', 'qrcodes')
-            if not os.path.exists(qr_folder):
-                os.makedirs(qr_folder)
-
-            for index, row in df.iterrows():
-                qr_path = os.path.join(qr_folder, f"{row['Ticket_ID']}.png")
-                generate_qr_code(
-                    row['Ticket_ID'], 
-                    output_path=qr_path, 
-                    name=row['Name'], 
-                    reg_no=row['Reg_No'], 
-                    student_id=row['Student_ID'],
-                    section=row['Section']
-                )
+            # Note: QR codes are generated on-the-fly when needed (download routes)
+            # to avoid file system issues on serverless platforms like Vercel
             
             # Convert to list of lists for Sheets
             students_data = df[['Student_ID', 'Name', 'Reg_No', 'Section', 'Ticket_ID', 'Status', 'Entry_Time']].values.tolist()
