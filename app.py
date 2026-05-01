@@ -22,11 +22,12 @@ app.secret_key = 'super_secret_key' # Change this in production
 
 # Configuration
 from dotenv import load_dotenv
-env_path = os.path.join(os.path.dirname(__file__), '.env')
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+env_path = os.path.join(BASE_DIR, '.env')
 load_dotenv(dotenv_path=env_path)
 
 # Handle credentials - can come from file (local) or environment variable (Vercel)
-CREDENTIALS_FILE = os.environ.get('GOOGLE_SHEETS_CREDENTIALS_FILE', 'credentials.json')
+CREDENTIALS_FILE = os.environ.get('GOOGLE_SHEETS_CREDENTIALS_FILE', os.path.join(BASE_DIR, 'credentials.json'))
 SHEET_ID = os.environ.get('SHEET_ID', 'your_sheet_id')
 ADMIN_USERNAME = os.environ.get('ADMIN_USERNAME', 'admin')
 ADMIN_PASSWORD = os.environ.get('ADMIN_PASSWORD', 'secret')
@@ -36,6 +37,7 @@ print(f"Working Dir: {os.getcwd()}")
 print(f"Env Path: {env_path} (Exists: {os.path.exists(env_path)})")
 print(f"Sheet ID: {'...' + SHEET_ID[-5:] if SHEET_ID else 'None'}")
 print(f"Credentials File: {CREDENTIALS_FILE} (Exists: {os.path.exists(CREDENTIALS_FILE)})")
+print(f"Resolved Credentials File: {os.path.abspath(CREDENTIALS_FILE)}")
 print(f"Using Env Creds: {'GOOGLE_SHEETS_CREDENTIALS_JSON' in os.environ}")
 print(f"------------------\n")
 

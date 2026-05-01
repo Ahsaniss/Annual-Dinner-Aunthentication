@@ -15,14 +15,26 @@ class SheetsHandler:
         self.logs_worksheet = None
         self.temp_creds_file = None
 
+    def _resolve_credentials_file(self):
+        """Resolve the credential path relative to this project if needed."""
+        if os.path.isabs(self.credentials_file):
+            return self.credentials_file
+
+        module_dir = os.path.dirname(os.path.abspath(__file__))
+        project_path = os.path.join(module_dir, self.credentials_file)
+        if os.path.exists(project_path):
+            return project_path
+
+        return self.credentials_file
+
     def connect(self):
         """Connects to Google Sheets using service account credentials."""
         try:
             scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
-            creds_file_to_use = self.credentials_file
+            creds_file_to_use = self._resolve_credentials_file()
             
             # Check if credentials file exists
-            if not os.path.exists(self.credentials_file):
+            if not os.path.exists(creds_file_to_use):
                 # Try loading from environment variable (for Vercel deployment)
                 creds_json_env = os.environ.get('GOOGLE_SHEETS_CREDENTIALS_JSON')
                 if creds_json_env:
@@ -38,7 +50,7 @@ class SheetsHandler:
                     except json.JSONDecodeError:
                         raise ValueError("Invalid JSON in GOOGLE_SHEETS_CREDENTIALS_JSON environment variable")
                 else:
-                    raise FileNotFoundError(f"Credentials file not found: {self.credentials_file} and GOOGLE_SHEETS_CREDENTIALS_JSON env var not set")
+                            raise FileNotFoundError(f"Credentials file not found: {creds_file_to_use} and GOOGLE_SHEETS_CREDENTIALS_JSON env var not set")
                 
             creds = ServiceAccountCredentials.from_json_keyfile_name(creds_file_to_use, scope)
             self.client = gspread.authorize(creds)
