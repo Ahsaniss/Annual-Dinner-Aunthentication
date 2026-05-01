@@ -139,6 +139,11 @@ def upload_csv():
             traceback_str = traceback.format_exc()
             print(traceback_str)
             print(f"{'='*60}\n")
+            
+            # Make the error message much clearer for 404s
+            if "404" in error_msg:
+                error_msg = f"404 Not Found. Please check that Vercel is using the exact SHEET_ID (Currently trying to use: '{SHEET_ID}') and that the sheet is shared with the bot email."
+                
             flash(f'Error Processing Upload: {error_msg}')
             return redirect(url_for('dashboard'))
             
