@@ -8,8 +8,18 @@ import zipfile
 from functools import wraps
 import datetime
 import traceback
+import tempfile
 
-app = Flask(__name__)
+# Detect if running on Vercel (serverless environment)
+IS_VERCEL = os.environ.get('VERCEL') == '1'
+
+# For Vercel, use /tmp (writable temp directory); otherwise use local static folder
+if IS_VERCEL:
+    STATIC_FOLDER = os.path.join(tempfile.gettempdir(), 'flask_static')
+    os.makedirs(STATIC_FOLDER, exist_ok=True)
+    app = Flask(__name__, static_folder=STATIC_FOLDER)
+else:
+    app = Flask(__name__)
 app.secret_key = 'super_secret_key' # Change this in production
 
 # Configuration
