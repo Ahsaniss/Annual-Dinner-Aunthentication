@@ -32,10 +32,6 @@
                         <small class="text-muted d-block">STUDENT ID</small>
                         <span id="student-id" class="fw-bold"></span>
                     </div>
-                    <div class="col-6 border-bottom pb-2">
-                        <small class="text-muted d-block">REG NO</small>
-                        <span id="student-reg" class="fw-bold"></span>
-                    </div>
                     <div class="col-12">
                         <small class="text-muted d-block">SECTION</small>
                         <span id="student-section" class="fw-bold"></span>
@@ -126,11 +122,10 @@
                 studentDetails.style.display = 'block';
                 document.getElementById('student-name').innerText = data.student.name;
                 document.getElementById('student-id').innerText = data.student.student_id;
-                document.getElementById('student-reg').innerText = data.student.reg_no;
                 document.getElementById('student-section').innerText = data.student.section;
 
                 // Add to recent scans
-                addToRecentScans(data.student.name, data.student.reg_no, 'ALLOW');
+                addToRecentScans(data.student.name, data.student.student_id, 'ALLOW');
             }
         } else {
             resultBox.classList.add('bg-danger', 'bg-opacity-10', 'border-danger');
@@ -144,7 +139,6 @@
                     studentDetails.style.display = 'block';
                     document.getElementById('student-name').innerText = data.student.name;
                     document.getElementById('student-id').innerText = data.student.student_id;
-                    document.getElementById('student-reg').innerText = data.student.reg_no;
                     document.getElementById('student-section').innerText = data.student.section;
                 }
             } else if (data.status === 'invalid') {

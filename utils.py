@@ -9,10 +9,10 @@ def generate_uuid():
 
 from PIL import Image, ImageDraw, ImageFont
 
-def generate_qr_code(data, output_path=None, name=None, reg_no=None, student_id=None, section=None):
+def generate_qr_code(data, output_path=None, name=None, student_id=None, section=None):
     """
     Generates a QR code for the given data.
-    If name, reg_no, student_id, or section are provided, adds them as text below the QR code.
+    If name, student_id, or section are provided, adds them as text below the QR code.
     If output_path is provided, saves to file.
     Returns the image object.
     """
@@ -27,7 +27,7 @@ def generate_qr_code(data, output_path=None, name=None, reg_no=None, student_id=
 
     qr_img = qr.make_image(fill_color="black", back_color="white").convert('RGB')
     
-    if name or reg_no or student_id or section:
+    if name or student_id or section:
         # Create a new image with space for text
         qr_width, qr_height = qr_img.size
         # Add extra height for 4 lines of text
@@ -55,10 +55,7 @@ def generate_qr_code(data, output_path=None, name=None, reg_no=None, student_id=
             draw.text((qr_width // 2, y_offset), f"Name: {name}", fill="black", font=font_bold, anchor="mt")
             y_offset += line_height
         
-        if reg_no:
-            draw.text((qr_width // 2, y_offset), f"Reg No: {reg_no}", fill="black", font=font, anchor="mt")
-            y_offset += line_height
-            
+        
         if student_id:
             draw.text((qr_width // 2, y_offset), f"ID: {student_id}", fill="black", font=font, anchor="mt")
             y_offset += line_height

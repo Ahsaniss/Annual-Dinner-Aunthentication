@@ -112,7 +112,7 @@ def upload_csv():
                     flash('Some lines were skipped due to formatting issues.')
             
             # Check required columns
-            required_cols = ['Student_ID', 'Name', 'Reg_No', 'Section']
+            required_cols = ['Student_ID', 'Name', 'Section']
             if not all(col in df.columns for col in required_cols):
                 flash(f'CSV must contain columns: {", ".join(required_cols)}')
                 return redirect(url_for('dashboard'))
@@ -126,7 +126,7 @@ def upload_csv():
             # to avoid file system issues on serverless platforms like Vercel
             
             # Convert to list of lists for Sheets
-            students_data = df[['Student_ID', 'Name', 'Reg_No', 'Section', 'Ticket_ID', 'Status', 'Entry_Time']].values.tolist()
+            students_data = df[['Student_ID', 'Name', 'Section', 'Ticket_ID', 'Status', 'Entry_Time']].values.tolist()
             
             # Upload to Sheets
             sheets_handler.add_students(students_data)
@@ -163,7 +163,6 @@ def download_qrs():
         for student in students:
             ticket_id = student.get('Ticket_ID')
             name = student.get('Name')
-            reg_no = student.get('Reg_No')
             student_id = student.get('Student_ID')
             
             if ticket_id:
@@ -171,7 +170,6 @@ def download_qrs():
                 img = generate_qr_code(
                     ticket_id, 
                     name=name, 
-                    reg_no=reg_no, 
                     student_id=student_id,
                     section=student.get('Section')
                 )
@@ -199,7 +197,6 @@ def download_single_qr(ticket_id):
         img = generate_qr_code(
             ticket_id, 
             name=student.get('Name'), 
-            reg_no=student.get('Reg_No'), 
             student_id=student.get('Student_ID'),
             section=student.get('Section')
         )
@@ -274,7 +271,6 @@ def verify_ticket():
                 'student': {
                     'student_id': student.get('Student_ID'),
                     'name': student.get('Name'),
-                    'reg_no': student.get('Reg_No'),
                     'section': student.get('Section')
                 }
             })

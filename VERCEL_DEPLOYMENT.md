@@ -70,7 +70,7 @@ Vercel will automatically redeploy when you push. If not, manually trigger a red
 ## Testing Upload
 
 1. Login with your admin credentials
-2. Upload a CSV with columns: `Student_ID`, `Name`, `Reg_No`, `Section`
+2. Upload a CSV with columns: `Student_ID`, `Name`, `Section`
 3. Should see "Students uploaded successfully!" message
 4. No more read-only file system errors!
 

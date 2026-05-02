@@ -41,7 +41,7 @@
                     <div class="mb-3">
                         <label for="file" class="form-label text-muted">Select CSV File</label>
                         <input class="form-control" type="file" id="file" name="file" accept=".csv" required>
-                        <div class="form-text">Required: Student_ID, Name, Reg_No, Section</div>
+                        <div class="form-text">Required: Student_ID, Name, Section</div>
                     </div>
                     <button type="submit" class="btn btn-primary w-100 py-2 fw-bold">Upload & Generate QRs</button>
                 </form>
@@ -73,7 +73,6 @@
                         <thead class="bg-light sticky-top">
                             <tr>
                                 <th class="ps-4">Name</th>
-                                <th>Reg No</th>
                                 <th>Status</th>
                                 <th>Entry Time</th>
                                 <th class="pe-4 text-end">Action</th>
@@ -86,7 +85,6 @@
                                     <div class="fw-semibold">{{ student.Name }}</div>
                                     <small class="text-muted">{{ student.Section }}</small>
                                 </td>
-                                <td>{{ student.Reg_No }}</td>
                                 <td>
                                     {% if student.Status == 'IN' %}
                                     <span class="badge bg-success-api rounded-pill px-3">INSIDE</span>

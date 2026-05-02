@@ -12,7 +12,6 @@ def test_qr_generation():
     
     test_data = "TEST-TICKET-123"
     test_name = "John Doe"
-    test_reg = "2023-CS-101"
     test_id = "SID001"
     
     output_path = os.path.join(test_dir, "test_qr_labeled.png")
@@ -22,7 +21,6 @@ def test_qr_generation():
         test_data, 
         output_path=output_path, 
         name=test_name, 
-        reg_no=test_reg, 
         student_id=test_id
     )
     

@@ -86,8 +86,8 @@ class SheetsHandler:
         try:
             self.students_worksheet = self.sheet.worksheet("Students")
         except gspread.exceptions.WorksheetNotFound:
-            self.students_worksheet = self.sheet.add_worksheet(title="Students", rows="1000", cols="7")
-            self.students_worksheet.append_row(["Student_ID", "Name", "Reg_No", "Section", "Ticket_ID", "Status", "Entry_Time"])
+            self.students_worksheet = self.sheet.add_worksheet(title="Students", rows="1000", cols="6")
+            self.students_worksheet.append_row(["Student_ID", "Name", "Section", "Ticket_ID", "Status", "Entry_Time"])
 
         try:
             self.logs_worksheet = self.sheet.worksheet("Scan Logs")
@@ -149,12 +149,12 @@ class SheetsHandler:
         if self.students_worksheet:
             timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             
-            # Update Status column (F)
-            self.students_worksheet.update_cell(row_index, 6, status)
+            # Update Status column (E)
+            self.students_worksheet.update_cell(row_index, 5, status)
 
-            # Update Entry_Time (G)
+            # Update Entry_Time (F)
             if gate_type == "IN":
-                 self.students_worksheet.update_cell(row_index, 7, timestamp)
+                 self.students_worksheet.update_cell(row_index, 6, timestamp)
 
     def log_scan(self, ticket_id, gate_type, result):
         """Logs a scan event."""

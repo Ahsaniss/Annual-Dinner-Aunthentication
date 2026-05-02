@@ -7,7 +7,6 @@ from utils import generate_uuid
 test_data = {
     'Student_ID': ['S001', 'S002'],
     'Name': ['Ahmed Ali', 'Zahra Khan'],
-    'Reg_No': ['REG001', 'REG002'],
     'Department': ['CS', 'ENG']
 }
 
@@ -26,7 +25,7 @@ try:
     print(df)
     
     # Convert to list of lists
-    students_data = df[['Student_ID', 'Name', 'Reg_No', 'Department', 'Ticket_ID', 'Status', 'Entry_Time', 'Exit_Time']].values.tolist()
+    students_data = df[['Student_ID', 'Name', 'Department', 'Ticket_ID', 'Status', 'Entry_Time', 'Exit_Time']].values.tolist()
     print("\nData to upload:")
     print(students_data)
     
