@@ -71,6 +71,8 @@
     const declineIcon = document.getElementById('decline-icon');
 
     let isScanning = true;
+    let autoResumeTimeout;
+
     let html5QrcodeScanner = new Html5QrcodeScanner(
         "reader", { fps: 10, qrbox: 250 });
 
@@ -78,8 +80,8 @@
         if (!isScanning) return;
         isScanning = false;
 
-        // Stop scanning temporarily
-        html5QrcodeScanner.clear();
+        // Do not clear the scanner so the camera stream stays active
+        // html5QrcodeScanner.clear();
 
         // Send to backend
         fetch('/api/verify', {
@@ -105,7 +107,8 @@
     function showResult(data) {
         resultBox.style.display = 'block';
         studentDetails.style.display = 'none';
-        resumeBtn.style.display = 'inline-block';
+        // Hide the manual resume button since it resumes automatically
+        resumeBtn.style.display = 'none';
         allowIcon.style.display = 'none';
         declineIcon.style.display = 'none';
 
@@ -149,6 +152,12 @@
 
             addToRecentScans(data.student ? data.student.name : 'Unknown', 'DECLINED', 'DECLINE');
         }
+
+        // Automatically resume scanning after 5 seconds
+        clearTimeout(autoResumeTimeout);
+        autoResumeTimeout = setTimeout(() => {
+            resumeScanning();
+        }, 5000);
     }
 
     function addToRecentScans(name, reg, type) {
@@ -184,11 +193,15 @@
         }
     }
 
-    resumeBtn.addEventListener('click', () => {
+    function resumeScanning() {
         resultBox.style.display = 'none';
-        resumeBtn.style.display = 'none';
         isScanning = true;
-        html5QrcodeScanner.render(onScanSuccess);
+    }
+
+    // Optional: allow early skip if they click the button
+    resumeBtn.addEventListener('click', () => {
+        clearTimeout(autoResumeTimeout);
+        resumeScanning();
     });
 
     html5QrcodeScanner.render(onScanSuccess);
