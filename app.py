@@ -160,27 +160,33 @@ def download_qrs():
         
     memory_file = io.BytesIO()
     with zipfile.ZipFile(memory_file, 'w', zipfile.ZIP_DEFLATED) as zipf:
-        for student in students:
+        for idx, student in enumerate(students, start=1):
             ticket_id = student.get('Ticket_ID')
             name = student.get('Name')
             student_id = student.get('Student_ID')
-            
+
             if ticket_id:
                 # Generate labeled QR
                 img = generate_qr_code(
-                    ticket_id, 
-                    name=name, 
+                    ticket_id,
+                    name=name,
                     student_id=student_id,
                     section=student.get('Section')
                 )
-                
+
                 # Save image to buffer to add to zip
                 img_io = io.BytesIO()
                 img.save(img_io, 'PNG')
                 img_io.seek(0)
-                
-                # Use name in filename for better usability
-                filename = f"{name.replace(' ', '_')}_{ticket_id}.png" if name else f"{ticket_id}.png"
+
+                # Prefix filenames with a zero-padded sequence so extraction preserves CSV order
+                safe_name = name.replace(' ', '_').replace('/', '_') if name else None
+                seq_prefix = f"{idx:04d}"
+                if safe_name:
+                    filename = f"{seq_prefix}_{safe_name}_{ticket_id}.png"
+                else:
+                    filename = f"{seq_prefix}_{ticket_id}.png"
+
                 zipf.writestr(filename, img_io.getvalue())
     
     memory_file.seek(0)
