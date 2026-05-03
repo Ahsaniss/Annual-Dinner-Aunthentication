@@ -73,6 +73,7 @@
                         <thead class="bg-light sticky-top">
                             <tr>
                                 <th class="ps-4">Name</th>
+                                <th>Section</th>
                                 <th>Status</th>
                                 <th>Entry Time</th>
                                 <th class="pe-4 text-end">Action</th>
@@ -83,8 +84,8 @@
                             <tr>
                                 <td class="ps-4">
                                     <div class="fw-semibold">{{ student.Name }}</div>
-                                    <small class="text-muted">{{ student.Section }}</small>
                                 </td>
+                                <td class="text-muted small">{{ student.Section }}</td>
                                 <td>
                                     {% if student.Status == 'IN' %}
                                     <span class="badge bg-success-api rounded-pill px-3">INSIDE</span>
